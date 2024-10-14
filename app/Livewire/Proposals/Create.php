@@ -5,6 +5,7 @@ namespace App\Livewire\Proposals;
 use App\Actions\ArrengePositions;
 use App\Models\Project;
 use App\Models\Proposal;
+use App\Notifications\NewProposal;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -34,7 +35,7 @@ class Create extends Component
             return;
         }
 
-        DB::transaction(function() {
+        DB::transaction(function () {
             $proposal = $this->project->proposals()->updateOrCreate([
                 'email' => $this->email
             ], [
@@ -43,6 +44,8 @@ class Create extends Component
 
             $this->arrengePositions($proposal);
         });
+
+        $this->project->author->notify(new NewProposal($this->project)); 
 
         $this->dispatch('proposal::created');
 
